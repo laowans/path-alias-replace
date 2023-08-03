@@ -1,0 +1,16 @@
+# 忽略目录
+node_modules/
+src/
+temp/
+/temp2
+/temp3
+/temp4
+/temp5
+/temp6
+test/
+
+# 忽略指定文件
+.gitignore
+package-lock.json
+tsconfig-paths-bootstrap.js
+tsconfig.json
