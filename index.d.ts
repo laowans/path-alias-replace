@@ -73,6 +73,18 @@ export declare interface Options {
 		 * 替换后执行命令
 		 */
 		rafter?: string;
+		/**
+		 * rbefore 环境变量
+		 */
+		rbeforeEnv?: {
+			[k: string]: string;
+		};
+		/**
+		 * rafter 环境变量
+		 */
+		rafterEnv?: {
+			[k: string]: string;
+		};
 	};
 }
 
