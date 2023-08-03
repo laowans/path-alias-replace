@@ -32,7 +32,10 @@ function regexpEscape(s: string) {
 // 匹配 require 导入
 const requireRegExp = /(require\(['"])(.+)(['"]\))/g;
 // 匹配 import 导入
-const importRegExp = /(import .+ from ['"])(.+)(['"])/g;
+const importRegExp1 = /(import .+ from ['"])(.+)(['"])/g; // import …… from ……
+const importRegExp2 = /(import ['"])(.+)(['"])/g; // import ……
+const importRegExp3 = /(import\(['"])(.+)(['"]\))/g; // import(……)
+const importRegExp4 = /(export .+ from ['"])(.+)(['"])/g; // export …… from ……
 // 匹配文件扩展名
 const extRegExp = /.*\.([a-zA-Z0-9]+)$/;
 
@@ -174,7 +177,10 @@ export function replace(options: ReplaceOptions) {
 
 						// 是否需要匹配 import 导入
 						if (options.import) {
-							content = content.replace(importRegExp, replaceCallback(curPath, 'import'));
+							content = content.replace(importRegExp1, replaceCallback(curPath, 'import'));
+							content = content.replace(importRegExp2, replaceCallback(curPath, 'import'));
+							content = content.replace(importRegExp3, replaceCallback(curPath, 'import'));
+							content = content.replace(importRegExp4, replaceCallback(curPath, 'import'));
 						}
 
 						// 判断是否需要写入
