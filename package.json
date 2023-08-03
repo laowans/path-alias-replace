@@ -11,7 +11,8 @@
   "main": "./dist/index.js",
   "types": "./index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "pub": "npm run build && npm publish --access public"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",
