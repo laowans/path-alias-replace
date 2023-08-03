@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "es6",
+		"target": "ES6",
 		"module": "commonjs",
 		"outDir": "dist",
 		"strict": true,
@@ -12,7 +12,6 @@
 		"noImplicitThis": false,
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["src/*"],
 			"@type": ["./index.d.ts"],
 		}
 	},

@@ -14,7 +14,7 @@ export interface WatchOpitons {
 	ignored?: WatchOptions['ignored'];
 }
 
-export interface Options {
+export declare interface Options {
 	/**
 	 * 扫描路径
 	 */

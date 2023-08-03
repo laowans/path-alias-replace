@@ -26,7 +26,7 @@ function getOptions<T, K extends keyof T>(o: T | undefined, k: K[], d: Partial<P
 
 // 创建进程
 function createProcess(command: string, exitCallback?: Function) {
-	console.log(chalk.green(`run command "${command}"`));
+	console.log(chalk.green(`run command  "${command}"`));
 
 	return spawn(command, { stdio: 'inherit', shell: true }).on('exit', () => {
 		console.log(chalk.red(`exit command "${command}"`));
