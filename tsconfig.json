@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "commonjs",
+		"outDir": "dist",
+		"strict": true,
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"experimentalDecorators": true,
+		"removeComments": true,
+		"noImplicitThis": false,
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"],
+			"@type": ["./index.d.ts"],
+		}
+	},
+	"include": ["src", "index.d.ts"],
+	"exclude": ["node_modules"]
+}
