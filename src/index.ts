@@ -93,6 +93,10 @@ export function pathAliasReplace(opitons: Options) {
 		});
 
 		if (opitons.watchOpitons) {
+			// 进程实例
+			let rbefore: ChildProcess | null;
+			let rafter: ChildProcess | null;
+
 			if (opitons.watchOpitons.rbefore) {
 				// 替换前执行命令
 				const command = opitons.watchOpitons.rbefore;
@@ -111,9 +115,6 @@ export function pathAliasReplace(opitons: Options) {
 						opitons.watchOpitons?.rbeforeEnv
 					);
 				};
-
-				// 进程实例
-				let rbefore: ChildProcess | null = cp();
 
 				// 防抖处理
 				const fn = debounce((next: Function) => {
@@ -154,9 +155,6 @@ export function pathAliasReplace(opitons: Options) {
 					);
 				};
 
-				// 进程实例
-				let rafter: ChildProcess | null = cp();
-
 				// 防抖处理
 				const fn = debounce((next: Function) => {
 					if (!exit && rafter) {
@@ -176,6 +174,11 @@ export function pathAliasReplace(opitons: Options) {
 
 				watcher.onAfter(fn);
 			}
+
+			process.on('exit', () => {
+				if (rbefore) kill(rbefore);
+				if (rafter) kill(rafter);
+			});
 		}
 
 		replace(replaceOptions);
@@ -186,7 +189,6 @@ export function pathAliasReplace(opitons: Options) {
 
 /**
  * 删除指定目录下的的所有文件和文件夹
- * 用的一定注意路径，
  */
 export function deleteFolderRecursive(folderPath: string) {
 	function func(folderPath: string, s: boolean = false) {
