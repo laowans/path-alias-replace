@@ -89,3 +89,5 @@ export declare interface Options {
 }
 
 export declare function pathAliasReplace(options: Options): void;
+
+export declare function deleteFolderRecursive(folderPath: string): void;

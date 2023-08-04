@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import chalk from 'chalk';
 import { Watch } from './watch';
 import { kill } from './utils/kill';
@@ -180,4 +182,38 @@ export function pathAliasReplace(opitons: Options) {
 	} else {
 		replace(replaceOptions);
 	}
+}
+
+/**
+ * 删除指定目录下的的所有文件和文件夹
+ * 用的一定注意路径，
+ */
+export function deleteFolderRecursive(folderPath: string) {
+	function func(folderPath: string, s: boolean = false) {
+		if (fs.existsSync(folderPath)) {
+			fs.readdirSync(folderPath).forEach((file) => {
+				const curPath = path.join(folderPath, file);
+
+				if (fs.lstatSync(curPath).isDirectory()) {
+					// 递归删除子文件夹
+					func(curPath);
+				} else {
+					try {
+						// 删除文件
+						fs.unlinkSync(curPath);
+					} catch (error) {
+						throw error;
+					}
+				}
+			});
+			try {
+				// 删除文件夹本身
+				if (!s) fs.rmdirSync(folderPath);
+			} catch (error) {
+				throw error;
+			}
+		}
+	}
+
+	func(folderPath, true);
 }
