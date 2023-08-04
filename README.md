@@ -276,6 +276,20 @@ const options = {
 		rafterEnv:{
 			NODE_ENV: 'development'
 		}
+
+		// 是否在初始化时执行 rbefore，也就是执行 pathAliasReplace 方法时
+		// 默认值：true
+		rbeforeImmediate: true,
+
+		// 是否在初始化时执行 rafter
+		// 默认值：true
+		rafterImmediate: true,
+
+		// rbefore 的 cwd
+		rbeforeCwd
+
+		// rafter 的 cwd
+		rafterCwd
 	},
 };
 ```
