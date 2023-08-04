@@ -68,7 +68,7 @@ pathAliasReplace({
 "scripts": {
     "tsc:w": "tsc --watch",
     "dev": "node ./script/dev.js",
-},
+}
 ```
 
 接下来就是开两个终端，依次运行 `npm run tsc:w` 和 `npm run dev`
@@ -111,7 +111,7 @@ pathAliasReplace({
 "scripts": {
     "tsc:w": "tsc --watch",
     "dev": "node ./script/dev.js",
-},
+}
 ```
 
 然后在终端把那两个命令一敲，就 OK 啦！
@@ -141,7 +141,7 @@ pathAliasReplace({
 "scripts": {
     "tsc:w": "tsc --watch",
     "dev": "node ./script/dev.js",
-},
+}
 ```
 
 再在终端把那两个命令一敲，就好了！
