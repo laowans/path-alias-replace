@@ -1,4 +1,5 @@
 import { WatchOptions } from 'chokidar';
+import { ProcessEnvOptions } from 'child_process';
 
 /**
  * 监控配置项
@@ -76,15 +77,27 @@ export declare interface Options {
 		/**
 		 * rbefore 环境变量
 		 */
-		rbeforeEnv?: {
-			[k: string]: string;
-		};
+		rbeforeEnv?: ProcessEnvOptions['env'];
 		/**
 		 * rafter 环境变量
 		 */
-		rafterEnv?: {
-			[k: string]: string;
-		};
+		rafterEnv?: ProcessEnvOptions['env'];
+		/**
+		 * 是否在初始化时执行 rbefore
+		 */
+		rbeforeImmediate?: boolean;
+		/**
+		 * 是否在初始化时执行 rafter
+		 */
+		rafterImmediate?: boolean;
+		/**
+		 * rbefore cwd
+		 */
+		rbeforeCwd?: ProcessEnvOptions['cwd'];
+		/**
+		 * rafter cwd
+		 */
+		rafterCwd?: ProcessEnvOptions['cwd'];
 	};
 }
 

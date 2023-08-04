@@ -6,7 +6,7 @@ import { kill } from './utils/kill';
 import { debounce } from './utils/debounce';
 import { Options, WatchOpitons } from '@type';
 import { replace, ReplaceOptions } from './replace';
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, ChildProcess, ProcessEnvOptions } from 'child_process';
 
 // 获取配置对象
 function getOptions<T, K extends keyof T>(o: T | undefined, k: K[], d: Partial<Pick<T, K>>) {
@@ -27,10 +27,15 @@ function getOptions<T, K extends keyof T>(o: T | undefined, k: K[], d: Partial<P
 }
 
 // 创建进程
-function createProcess(command: string, exitCallback?: Function, env?: { [k: string]: string }) {
+function createProcess(
+	command: string,
+	exitCallback?: Function,
+	env?: ProcessEnvOptions['env'],
+	cwd?: ProcessEnvOptions['cwd']
+) {
 	console.log(chalk.green(`run command  "${command}"`));
 
-	return spawn(command, { stdio: 'inherit', shell: true, env: env }).on('exit', () => {
+	return spawn(command, { stdio: 'inherit', shell: true, env, cwd }).on('exit', () => {
 		console.log(chalk.red(`exit command "${command}"`));
 
 		if (exitCallback) exitCallback();
@@ -94,8 +99,13 @@ export function pathAliasReplace(opitons: Options) {
 
 		if (opitons.watchOpitons) {
 			// 进程实例
-			let rbefore: ChildProcess | null;
-			let rafter: ChildProcess | null;
+			let rbeforeProcess: ChildProcess | null;
+			let rafterProcess: ChildProcess | null;
+
+			const immediate = getOptions(opitons.watchOpitons, ['rbeforeImmediate', 'rafterImmediate'], {
+				rbeforeImmediate: true,
+				rafterImmediate: true,
+			});
 
 			if (opitons.watchOpitons.rbefore) {
 				// 替换前执行命令
@@ -109,25 +119,29 @@ export function pathAliasReplace(opitons: Options) {
 					return createProcess(
 						command,
 						() => {
-							rbefore = null;
+							rbeforeProcess = null;
 							exit = true;
 						},
-						opitons.watchOpitons?.rbeforeEnv
+						opitons.watchOpitons?.rbeforeEnv,
+						opitons.watchOpitons?.rbeforeCwd
 					);
 				};
 
+				// 是否要在初始化时执行 rbefore
+				if (immediate.rbeforeImmediate) rbeforeProcess = cp();
+
 				// 防抖处理
 				const fn = debounce((next: Function) => {
-					if (!exit && rbefore) {
-						rbefore.on('exit', () => {
-							rbefore = cp();
+					if (!exit && rbeforeProcess) {
+						rbeforeProcess.on('exit', () => {
+							rbeforeProcess = cp();
 
 							next();
 						});
 
-						kill(rbefore);
+						kill(rbeforeProcess);
 					} else {
-						rbefore = cp();
+						rbeforeProcess = cp();
 
 						next();
 					}
@@ -148,25 +162,29 @@ export function pathAliasReplace(opitons: Options) {
 					return createProcess(
 						command,
 						() => {
-							rafter = null;
+							rafterProcess = null;
 							exit = true;
 						},
-						opitons.watchOpitons?.rafterEnv
+						opitons.watchOpitons?.rafterEnv,
+						opitons.watchOpitons?.rafterCwd
 					);
 				};
 
+				// 是否要在初始化时执行 rafter
+				if (immediate.rafterImmediate) rafterProcess = cp();
+
 				// 防抖处理
 				const fn = debounce((next: Function) => {
-					if (!exit && rafter) {
-						rafter.on('exit', () => {
-							rafter = cp();
+					if (!exit && rafterProcess) {
+						rafterProcess.on('exit', () => {
+							rafterProcess = cp();
 
 							next();
 						});
 
-						kill(rafter);
+						kill(rafterProcess);
 					} else {
-						rafter = cp();
+						rafterProcess = cp();
 
 						next();
 					}
@@ -176,8 +194,8 @@ export function pathAliasReplace(opitons: Options) {
 			}
 
 			process.on('exit', () => {
-				if (rbefore) kill(rbefore);
-				if (rafter) kill(rafter);
+				if (rbeforeProcess) kill(rbeforeProcess);
+				if (rafterProcess) kill(rafterProcess);
 			});
 		}
 
