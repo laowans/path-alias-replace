@@ -167,6 +167,21 @@ pathAliasReplace({
 
 其他的都一样，我就不写了哈，打字挺累的，比写代码累多了
 
+##### 删除指定目录下多余的文件
+
+在 1.0.1 版本中，新增了删除文件的方法，可用于删除指定目录下多余的文件
+
+例如使用 tsc 编译，会在输出目录下生成 js 文件，若删除 src 下一个文件，再次使用 tsc 编译，并不会删除输出目录指定的文件，所以就可以在每次运行项目前，删除输出目录下所有的文件，这样就不会造成文件堆积
+
+记得检查一下路径，不要删除错了！
+
+```js
+const path = require('path');
+const { deleteFolderRecursive } = require('path-alias-replace');
+
+deleteFolderRecursive(path.join(__dirname, '../dist'));
+```
+
 ### 完整的配置文件
 
 ```js
