@@ -1,21 +1,22 @@
-import path from 'path';
-import { ChildProcess, execSync } from 'child_process';
-import { isWindows } from './env';
+import { ChildProcess } from 'child_process';
+import treeKill from 'tree-kill';
 
-export function kill(child: ChildProcess, callback?: Function) {
+/**
+ * 结束进程
+ */
+export function kill(child: ChildProcess, callback?: (err?: Error) => void) {
 	if (!callback) {
 		callback = () => {};
 	}
 
-	if (isWindows) {
-		try {
-			execSync('taskkill /pid ' + child.pid + ' /T /F');
-			callback();
-		} catch (e: any) {
-			throw e;
-		}
+	if (child.pid) {
+		treeKill(child.pid, callback);
 	} else {
-		child.kill();
-		callback();
+		try {
+			child.kill('SIGKILL');
+			callback();
+		} catch (e) {
+			callback(e as Error);
+		}
 	}
 }
