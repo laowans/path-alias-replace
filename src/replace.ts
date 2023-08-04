@@ -71,6 +71,7 @@ export function replace(options: ReplaceOptions) {
 			const old = p2; // 原始路径
 			const from = path.dirname(curPath);
 			let to;
+			let addInfo = false;
 
 			// 循环匹配别名
 			for (const key in options.alias) {
@@ -110,16 +111,7 @@ export function replace(options: ReplaceOptions) {
 					}
 				}
 
-				// 判断是否需要添加信息
-				if (options.outputReplacementInfo) {
-					const filePath = path.relative(options.sweepPath, curPath).replace(/\\/g, '/');
-
-					if (replaceInfo[filePath]) {
-						replaceInfo[filePath].push([old, p2]);
-					} else {
-						replaceInfo[filePath] = [[old, p2]];
-					}
-				}
+				addInfo = true;
 
 				isWrite = true;
 			} else {
@@ -135,8 +127,21 @@ export function replace(options: ReplaceOptions) {
 							p2 = './' + p2;
 						}
 
+						addInfo = true;
+
 						isWrite = true;
 					}
+				}
+			}
+
+			// 判断是否需要添加信息
+			if (options.outputReplacementInfo && addInfo) {
+				const filePath = path.relative(options.sweepPath, curPath).replace(/\\/g, '/');
+
+				if (replaceInfo[filePath]) {
+					replaceInfo[filePath].push([old, p2]);
+				} else {
+					replaceInfo[filePath] = [[old, p2]];
 				}
 			}
 
