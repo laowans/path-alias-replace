@@ -88,6 +88,13 @@ export declare interface Options {
 	};
 }
 
+/**
+ * 路径别名替换
+ */
 export declare function pathAliasReplace(options: Options): void;
 
+/**
+ * 删除指定目录下的的所有文件和文件夹
+ * 用的时候一定注意路径，
+ */
 export declare function deleteFolderRecursive(folderPath: string): void;
