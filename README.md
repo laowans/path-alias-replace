@@ -1,37 +1,272 @@
 # 路径别名替换
 
-#### 介绍
-路径别名替换
+### 介绍
 
-#### 软件架构
-软件架构说明
+我们在开发中经常使用路径别名，但是每次修改路径别名都需要手动替换，非常麻烦，所以有了这个包，可以自动替换路径别名。
 
+但这个包不止如此，它还可以给 `import` 导入的路径添加扩展名，就比如把 package.json 的 type 设置为 module 后，导入模块都需要添加 .js 后缀，还有 index.js 这种的也要手动补全，就无法和 require 导入一样丝滑了，但这个包就弥补这个缺点，可以给 `import` 导入语法可以自动添加 .js 后缀和 index.js，无需手动添加。
 
-#### 安装教程
+还有 watch 模式，可以监听文件变化，自动替换、自动添加扩展名。
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+> 要是各位有更好的建议，或发现 BUG，欢迎提 issue [项目地址](https://gitee.com/laowans/path-alias-replace)
 
-#### 使用说明
+### 特性
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+-   支持 watch 模式
+-   支持 路径别名替换相对路径
+-   支持 import 导入语法自动添加 .js 后缀/扩展名 和 index.js 文件路径自动补全
 
-#### 参与贡献
+### 安装
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+```
+npm i path-alias-replace -D
+```
 
+### 使用
 
-#### 特技
+#### express + ts 项目
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+首先新建一个 js 文件
+
+script/dev.js
+
+```js
+const path = require('path');
+// 注意哦，这个包是commonjs模块化，所以要使用require导入，暂时还不支持esm
+const { pathAliasReplace } = require('path-alias-replace');
+
+pathAliasReplace({
+	// 扫描路径，这里必须要是绝对路径哦
+	sweepPath: path.join(__dirname, '../dist'),
+	// 路径别名
+	alias: {
+		// 这里注意哦！不要写tsconfig.json的路径别名，不然路径会错误的
+		// 因为经过tsc编译后，文件就到dist目录下，所以这里要把src换成dist
+		// 这里具体要根据项目来，你就想着要给dist目录下的文件设置路径别名
+		// 这里也要要是绝对路径哦
+		'@': path.join(__dirname, '../dist'),
+	},
+	// 开始监控，默认监控的目录就是 sweepPath 的路径
+	watch: true,
+	// 监控配置
+	watchOpitons: {
+		// 替换完别名后执行的命令
+		rafter: 'node ./dist/app.js',
+		// 上面命令的环境变量
+		rafterEnv: {
+			NODE_ENV: 'development',
+		},
+	},
+});
+```
+
+这样一个简单的配置文件就写好了
+
+然后在 package.json 添加两个脚本
+
+```json
+"scripts": {
+    "tsc:w": "tsc --watch",
+    "dev": "node ./script/dev.js",
+},
+```
+
+接下来就是开两个终端，依次运行 `npm run tsc:w` 和 `npm run dev`
+
+这样就实现代码自动编译、自动替换别名和自动重启了
+
+> 至于使用 `tsc --watch` 就是因为实时编译基本上能做到和普通 express 项目加使用 nodemon 一样的速度。这边保存，那边就重启了，唉~主打就是一个丝滑。
+
+然后就可以愉快的写代码啦！
+
+#### electron + ts 项目
+
+还是一样，先新建一个 js 文件
+
+script/dev.js
+
+```js
+const path = require('path');
+const { pathAliasReplace } = require('path-alias-replace');
+
+pathAliasReplace({
+	sweepPath: path.join(__dirname, '../dist/main'),
+	alias: {
+		'@e': path.join(__dirname, '../dist/main'),
+	},
+	watch: true,
+	watchOpitons: {
+		// 替换完启动 electron
+		rafter: 'npx electron ./dist/main/main.js',
+		rafterEnv: {
+			NODE_ENV: 'development',
+		},
+	},
+});
+```
+
+还是一样，在 package.json 添加两个脚本
+
+```json
+"scripts": {
+    "tsc:w": "tsc --watch",
+    "dev": "node ./script/dev.js",
+},
+```
+
+然后在终端把那两个命令一敲，就 OK 啦！
+
+#### 单纯的 ts 项目，只是想用路径别名和路径自动添加扩展名
+
+还是先新建一个 js 文件
+
+script/dev.js
+
+```js
+const path = require('path');
+const { pathAliasReplace } = require('path-alias-replace');
+
+pathAliasReplace({
+	sweepPath: path.join(__dirname, '../dist/main'),
+	alias: {
+		'@': path.join(__dirname, '../dist/main'),
+	},
+	// 根据需要要不要开启监控
+});
+```
+
+在 package.json 添加两个脚本
+
+```json
+"scripts": {
+    "tsc:w": "tsc --watch",
+    "dev": "node ./script/dev.js",
+},
+```
+
+再在终端把那两个命令一敲，就好了！
+
+#### 单纯的 esm 模块化 js 项目
+
+这个上面那个差不多，只是没有编译的过程，直接替换别名了
+
+> 如果你只想使用自动添加扩展名功能，那么可以将 alias 设置为空对象，但是不能不写 alias 啊！会报错的！
+
+**这里注意哈，记得添加一个 outputPath 配置，不然就把你 src 下的文件别名替换了**
+
+```js
+pathAliasReplace({
+	sweepPath: path.join(__dirname, '../src'),
+	alias: {
+		'@': path.join(__dirname, '../src'),
+	},
+	// 将处理好的文件输出到指定目录
+	outputPath: path.join(__dirname, '../dist'),
+});
+```
+
+其他的都一样，我就不写哈，打字挺累的，比写代码累多了
+
+### 完整的配置文件
+
+```js
+const options = {
+	// 扫描路径，也就是要执行别名替换的目录
+	sweepPath: path.join(__dirname, '../dist'),
+
+	// 别名
+	alias: {
+		// 这里说下，这个别名结尾不用加 /，因为他会生成一个正则，比如 /^@\//，如果加了 / 结尾，那么这个正则就是 /^@\/\//，这样就匹配不到了
+		// 然后就是必须绝对路径
+		'@': path.join(__dirname, '../dist'),
+	},
+
+	// 以上的就是为数不多的两个必选参数，下面就是可选的了 ---------------------------
+
+	// 这个是用来设置那些文件，需要替换的，只有扩展名符合的才会替换别名、添加扩展名的操作
+	// 下面的就是默认值
+	ext: ['js'],
+
+	// 输出路径，将处理好的文件输出到指定目录
+	// 这个看需要，比如说 esm 的 js 项目，一定要写！它默认是修改"扫描路径"下的文件，不然就把你src下的文件给修改了
+	outputPath: path.join(__dirname, '../dist'),
+
+	// 输出路径不存在则创建
+	// 跟上那个配套的，就比如，一般新项目，或还没建 dist 文件夹，他就给你创建一个
+	// 默认值：true
+	createOutputPath: true,
+
+	// 是否匹配 require 导入
+	// 默认值：true
+	require: true,
+
+	// 是否匹配 import 导入
+	// 匹配有以下几种，要是不全，欢迎提 issue
+	// 1. import { xxx } from 'xxx'
+	// 2. import xxx from 'xxx'
+	// 3. import 'xxx'
+	// 4. import('xxx')
+	// 5. export * from 'xxx'
+	// 默认值：true
+	import: true,
+
+	// 这个需要自动添加那些扩展名
+	// 下面是默认值
+	importAutoAddExtension: ['js', 'mjs', 'json', 'node'],
+
+	// 是否输出替换信息，默认为：true，当开启 watch 时，默认为 false
+	/* 就是下面这种
+	replace path alias info
+	  b.js // 文件名，下面就是替换那些路径
+	  ├── @/d.mjs -> ./d.mjs
+	  ├── @/dir -> ./dir/index.js
+  	  └── ./a -> ./a.js
+	*/
+	outputReplacementInfo: true,
+
+	// 是否开始监控
+	// 默认值：false
+	watch: false,
+
+	// 监控配置项
+	watchOpitons: {
+		// 监控目录，这个默认就是"扫描路径"
+		// 这个也可以写相对路径，但是相对于 cwd (即终端的路径)
+		watchPath: '',
+
+		// 忽略的，可以是 string / RegExp / function， 也可以是由它们组成的数组
+		ignored: '',
+
+		// 以上两个参数会传递给 chokidar，具体可以看 chokidar 的文档
+		// https://github.com/paulmillr/chokidar
+
+		// 是否输出文件变化信息，如下
+		// change  a.js
+		// add     b.js
+		// 默认值：true
+		outputMsg: true,
+
+		// 替换前执行的命令
+		rbefore: 'node dev.js',
+
+		// 替换后执行的命令
+		rafter: 'node dev.js',
+
+		// rbefore 的环境变量
+		rbeforeEnv:{
+			NODE_ENV: 'development'
+		}
+
+		// rafter 的环境变量
+		rafterEnv:{
+			NODE_ENV: 'development'
+		}
+	},
+};
+```
+
+若是文档中有错误，欢迎提出！我会改正的
+
+都看这里了，要是觉得这个包还不错，给个 star 呗~
+
+\>\>\> [项目地址](https://gitee.com/laowans/path-alias-replace) <<<
