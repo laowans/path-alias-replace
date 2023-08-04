@@ -1,5 +1,6 @@
 # 忽略目录
 node_modules/
+script/
 src/
 temp/
 /temp2
