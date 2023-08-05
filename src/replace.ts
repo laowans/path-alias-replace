@@ -62,7 +62,7 @@ export function replace(options: ReplaceOptions) {
 	function outputInfo() {
 		if (Object.keys(replaceInfo).length > 0) {
 			const space = '  ';
-			console.log(chalk.blue('replace path alias info'));
+			console.log(chalk.blue('path alias replace info'));
 
 			// 格式化信息
 			for (const key in replaceInfo) {
