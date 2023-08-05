@@ -39,14 +39,26 @@ const importRegExp4 = /(export .+ from ['"])(.+)(['"])/g; // export …… from 
 // 匹配文件扩展名
 const extRegExp = /.*\.([a-zA-Z0-9]+)$/;
 
-// 格式化相对路径
-function formatRelativePath(p: string) {
-	// 替换: \ -> /
-	p = p.replace(/\\/g, '/');
+/**
+ * 格式化相对路径
+ * @param p relativePath / from
+ * @param t to
+ */
+function formatRelativePath(p: string, t?: string) {
+	if (t) {
+		p = path.relative(p, t);
+	}
 
-	// 判断是否需要加 ./
-	if (!/^\.\./.test(p)) {
-		p = './' + p;
+	if (path.isAbsolute(p)) {
+		return p;
+	} else {
+		// 替换: \ -> /
+		p = p.replace(/\\/g, '/');
+
+		// 判断是否需要加 ./
+		if (!/^\.\./.test(p)) {
+			p = './' + p;
+		}
 	}
 
 	return p;
@@ -83,7 +95,7 @@ export function replace(options: ReplaceOptions) {
 		return function (_match: string, p1: string, p2: string, p3: string) {
 			const old = p2; // 原始路径
 			const from = path.dirname(curPath);
-			let to;
+			let to: string | undefined;
 			let addInfo = false;
 
 			// 循环匹配别名
@@ -109,14 +121,7 @@ export function replace(options: ReplaceOptions) {
 					to = newImportPath;
 				}
 
-				// 获取相对路径
-				let newPath = path.relative(from, to);
-
-				if (path.isAbsolute(newPath)) {
-					p2 = newPath;
-				} else {
-					p2 = formatRelativePath(p2);
-				}
+				p2 = formatRelativePath(from, to);
 
 				addInfo = true;
 
@@ -126,7 +131,7 @@ export function replace(options: ReplaceOptions) {
 					const { newImportPath, change } = addExtension(path.join(from, p2), options.importAutoAddExtension);
 
 					if (change) {
-						p2 = formatRelativePath(path.relative(from, newImportPath));
+						p2 = formatRelativePath(from, newImportPath);
 
 						addInfo = true;
 
