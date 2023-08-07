@@ -8,7 +8,7 @@
 
 还有 watch 模式，可以监听文件变化，自动替换、自动添加扩展名。
 
-> 要是各位有更好的建议，或发现 BUG，欢迎提 issue [项目地址](https://gitee.com/laowans/path-alias-replace)
+> 要是各位有更好的建议，或发现 BUG，欢迎提 issue [gitee](https://gitee.com/laowans/path-alias-replace) [github](https://github.com/laowans/path-alias-replace)
 
 ### 特性
 
@@ -311,4 +311,4 @@ const options = {
 
 都看这里了，要是觉得这个包还不错，给个 star 呗~
 
-\>\>\> [项目地址](https://gitee.com/laowans/path-alias-replace) <<<
+\>\>\> [gitee](https://gitee.com/laowans/path-alias-replace) [github](https://github.com/laowans/path-alias-replace) <<<
