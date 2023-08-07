@@ -225,7 +225,7 @@ const options = {
 	// 默认值：true
 	import: true,
 
-	// 这个需要自动添加那些扩展名
+	// 这个需要自动添加那些扩展名，当值 undefined 时就不会自动添加
 	// 下面是默认值
 	importAutoAddExtension: ['js', 'mjs', 'json', 'node'],
 
