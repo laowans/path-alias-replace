@@ -196,7 +196,8 @@ const options = {
 		'@': path.join(__dirname, '../dist'),
 	},
 
-	// 以上的就是为数不多的两个必选参数，下面就是可选的了 ---------------------------
+	// 以上的就是为数不多的两个必选参数，下面就是可选的了
+	/* ------------------------------------------- */
 
 	// 这个是用来设置那些文件，需要替换的，只有扩展名符合的才会替换别名、添加扩展名的操作
 	// 下面的就是默认值
@@ -225,17 +226,25 @@ const options = {
 	// 默认值：true
 	import: true,
 
-	// 这个需要自动添加那些扩展名，当值 undefined 时就不会自动添加
+	// 这个需要自动添加那些扩展名，当值为 undefined 时就不会自动添加
+	// 这个只会给 import 导入，自动添加那些扩展名，而 require 导入本就有这功能，所以无需自动添加
+	// 注意自动添加那些扩展名，是通过判断文件是否存在，来添加的
 	// 下面是默认值
 	importAutoAddExtension: ['js', 'mjs', 'json', 'node'],
 
 	// 是否输出替换信息，默认为：true，当开启 watch 时，默认为 false
 	/* 就是下面这种
-	replace path alias info
-	  b.js // 文件名，下面就是替换那些路径
-	  ├── @/d.mjs -> ./d.mjs
-	  ├── @/dir -> ./dir/index.js
-  	  └── ./a -> ./a.js
+	path alias replace info
+	  a.js
+	  ├── import sa from '@/b' -> import sa from './b.js'
+	  ├── import { aa } from '@/b' -> import { aa } from './b.js'
+	  ├── import '@/b' -> import './b.js'
+	  ├── import '@/dir' -> import './dir/index.js'
+	  ├── import './dir' -> import './dir/index.js'
+	  ├── import('@/b') -> import('./b.js')
+	  └── export * from '@/b' -> export * from './b.js'
+	  b.js
+      └── require('@/a') -> require('./a')
 	*/
 	outputReplacementInfo: true,
 
@@ -256,8 +265,10 @@ const options = {
 		// https://github.com/paulmillr/chokidar
 
 		// 是否输出文件变化信息，如下
-		// change  a.js
-		// add     b.js
+		/* 这里的文件路径是相对于 watchPath
+			change  a.js
+			add     b.js
+		*/
 		// 默认值：true
 		outputMsg: true,
 
