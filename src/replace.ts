@@ -84,7 +84,7 @@ export function replace(options: ReplaceOptions) {
 					let prefix = '└──';
 					if (i < replaceInfo[key].length - 1) prefix = '├──';
 
-					console.log(space + `${prefix} ${chalk.green(a[0])} -> ${chalk.green(a[1])}`);
+					console.log(space + `${prefix} ${a[0]} ${chalk.yellow('->')} ${a[1]}`);
 				});
 			}
 		}
@@ -96,7 +96,7 @@ export function replace(options: ReplaceOptions) {
 			const old = p2; // 原始路径
 			const from = path.dirname(curPath);
 			let to: string | undefined;
-			let addInfo = false;
+			let addInfo = false; // 是否要添加替换信息
 
 			// 循环匹配别名
 			for (const key in options.alias) {
@@ -115,10 +115,13 @@ export function replace(options: ReplaceOptions) {
 			}
 
 			if (to) {
+				// 判断是否需要添加别名
 				if (type === 'import' && options.importAutoAddExtension) {
-					const { newImportPath } = addExtension(to, options.importAutoAddExtension);
+					const { newImportPath, change } = addExtension(to, options.importAutoAddExtension);
 
-					to = newImportPath;
+					if (change) {
+						to = newImportPath;
+					}
 				}
 
 				p2 = formatRelativePath(from, to);
@@ -127,6 +130,7 @@ export function replace(options: ReplaceOptions) {
 
 				isWrite = true;
 			} else {
+				// 判断是否需要添加别名
 				if (type === 'import' && options.importAutoAddExtension && /^\.?\.\//.test(p2)) {
 					const { newImportPath, change } = addExtension(path.join(from, p2), options.importAutoAddExtension);
 
@@ -142,12 +146,16 @@ export function replace(options: ReplaceOptions) {
 
 			// 判断是否需要添加信息
 			if (options.outputReplacementInfo && addInfo) {
+				// 替换文件路径
 				const filePath = path.relative(options.sweepPath, curPath).replace(/\\/g, '/');
 
+				const m1 = chalk.gray(p1) + chalk.green(old) + chalk.gray(p3); // old
+				const m2 = chalk.gray(p1) + chalk.green(p2) + chalk.gray(p3); // new
+
 				if (replaceInfo[filePath]) {
-					replaceInfo[filePath].push([old, p2]);
+					replaceInfo[filePath].push([m1, m2]);
 				} else {
-					replaceInfo[filePath] = [[old, p2]];
+					replaceInfo[filePath] = [[m1, m2]];
 				}
 			}
 

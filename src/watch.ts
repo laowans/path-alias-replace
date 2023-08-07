@@ -1,24 +1,25 @@
 import path from 'path';
 import chalk from 'chalk';
-import { WatchOpitons } from '@type';
 import chokidar, { FSWatcher } from 'chokidar';
-
-interface WatchEvnt {
-	before?: Function;
-	on?: Function;
-	after?: Function;
-}
+import { kill } from './utils/kill';
+import { WatchOpitons } from '@type';
+import { spawn, ChildProcess, ProcessEnvOptions } from 'child_process';
 
 /**
  * 监控类
  */
 export class Watch {
-	constructor(watchPath: string, opitons: WatchOpitons) {
+	constructor(watchPath: string, opitons: WatchOpitons, replaceFn: Function) {
 		this.watchPath = watchPath;
 		this.opitons = opitons;
+		this.replaceFn = replaceFn;
+
+		this.rbeforeBool = Boolean(opitons.rbefore);
+		this.rafterBool = Boolean(opitons.rafter);
 
 		this.start();
 	}
+
 	/**
 	 * 监控目录
 	 */
@@ -27,18 +28,39 @@ export class Watch {
 	 * 监控配置项
 	 */
 	readonly opitons: WatchOpitons;
+
 	/**
 	 * 监控实例
 	 */
 	private FSWatcher: FSWatcher | null = null;
 	/**
-	 * 事件
+	 * 替换方法
 	 */
-	private event: WatchEvnt = {};
+	private replaceFn: Function;
 	/**
-	 * 是否在运行事件
+	 * 防抖延时
 	 */
-	private running = false;
+	private wait = 300;
+	/**
+	 * 定时器实例
+	 */
+	private timeout?: NodeJS.Timeout;
+	/**
+	 * 是否启用 rbefore
+	 */
+	private rbeforeBool = false;
+	/**
+	 * 是否启用 rafter
+	 */
+	private rafterBool = false;
+	/**
+	 * rbefore 进程实例
+	 */
+	private rbeforeProcess: ChildProcess | null = null;
+	/**
+	 * rafter 进程实例
+	 */
+	private rafterProcess: ChildProcess | null = null;
 
 	/**
 	 * 开始监控
@@ -51,9 +73,21 @@ export class Watch {
 			})
 			.on('ready', () => {
 				this.bingEvents();
+
+				this.debounce(true);
+
+				console.log(chalk.magenta(`start watch "${this.watchPath}"`));
 			});
 	}
-
+	/**
+	 * 停止监控
+	 */
+	stop() {
+		if (this.FSWatcher) {
+			this.FSWatcher.close();
+			this.FSWatcher = null;
+		}
+	}
 	/**
 	 * 绑定事件
 	 */
@@ -64,79 +98,108 @@ export class Watch {
 			});
 		}
 	}
-
 	/**
 	 * 变化回调
 	 */
 	private changeCallback(type: 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir', _path: string) {
-		const runBefore = () => {
-			if (this.event.before) {
-				this.event.before(run);
-			} else {
-				run();
-			}
-		};
-		const run = () => {
-			if (this.event.on) {
-				this.event.on(runAfter);
-			} else {
-				runAfter();
-			}
-		};
-		const runAfter = () => {
-			if (this.event.after) {
-				this.event.after(() => {
-					this.running = false;
-				});
-			} else {
-				this.running = false;
-			}
-		};
+		this.debounce();
 
-		if (!this.running) {
-			this.running = true;
-			runBefore();
+		if (this.opitons.outputMsg) {
+			// 输出信息
+			let prefix = '';
 
-			if (this.opitons.outputMsg) {
-				const msg = ['\t', chalk.green(path.relative(this.watchPath, _path).replace(/\\/g, '/'))];
-
-				switch (type) {
-					case 'add':
-					case 'addDir':
-						msg.unshift(chalk.greenBright(type));
-						break;
-					case 'change':
-						msg.unshift(chalk.blueBright(type));
-						break;
-					case 'unlink':
-					case 'unlinkDir':
-						msg.unshift(chalk.redBright(type));
-						break;
-				}
-
-				console.log(msg.join(''));
+			switch (type) {
+				case 'add':
+				case 'addDir':
+					prefix = chalk.greenBright(type.padEnd(11, ' '));
+					break;
+				case 'change':
+					prefix = chalk.blueBright(type.padEnd(11, ' '));
+					break;
+				case 'unlink':
+				case 'unlinkDir':
+					prefix = chalk.redBright(type.padEnd(11, ' '));
+					break;
 			}
+
+			console.log(prefix + chalk.green(path.relative(this.watchPath, _path).replace(/\\/g, '/')));
 		}
 	}
-
 	/**
-	 * 停止监控
+	 * 防抖
 	 */
-	stop() {
-		if (this.FSWatcher) {
-			this.FSWatcher.close();
-			this.FSWatcher = null;
+	private debounce(immediate = false) {
+		clearTimeout(this.timeout);
+
+		if (this.rbeforeBool && this.rbeforeProcess) kill(this.rbeforeProcess);
+
+		if (this.rafterBool && this.rafterProcess) kill(this.rafterProcess);
+
+		this.timeout = setTimeout(() => {
+			this.create_rbefore(() => {
+				this.replaceFn();
+
+				this.create_rafter(immediate);
+			}, immediate);
+		}, this.wait);
+	}
+	/**
+	 * 创建进程
+	 */
+	private createProcess(
+		command: string,
+		exitCallback?: Function,
+		env?: ProcessEnvOptions['env'],
+		cwd?: ProcessEnvOptions['cwd']
+	) {
+		console.log(chalk.green(`run command  "${command}"`));
+
+		return spawn(command, { stdio: 'inherit', shell: true, env, cwd }).on('exit', () => {
+			console.log(chalk.red(`exit command "${command}"`));
+
+			if (exitCallback) exitCallback();
+		});
+	}
+	/**
+	 * 创建 rbefore
+	 */
+	private create_rbefore(next: Function, immediate: boolean) {
+		if (this.rbeforeBool) {
+			if (immediate && !this.opitons.rbeforeImmediate) {
+				return next();
+			}
+
+			this.rbeforeProcess = this.createProcess(
+				this.opitons.rbefore as string,
+				() => {
+					this.rbeforeProcess = null;
+				},
+				this.opitons.rbeforeEnv,
+				this.opitons.rbeforeCwd
+			);
+
+			next();
+		} else {
+			next();
 		}
 	}
+	/**
+	 * 创建 rafter
+	 */
+	private create_rafter(immediate: boolean) {
+		if (this.rafterBool) {
+			if (immediate && !this.opitons.rafterImmediate) {
+				return;
+			}
 
-	// 绑定事件
-	onBefore(fn: (next: Function) => void) {
-		this.event.before = fn;
-	}
-	on(fn: (next: Function) => void) {
-		this.event.on = fn;
-	}
-	onAfter(fn: (next: Function) => void) {
-		this.event.after = fn;
+			this.rafterProcess = this.createProcess(
+				this.opitons.rafter as string,
+				() => {
+					this.rafterProcess = null;
+				},
+				this.opitons.rafterEnv,
+				this.opitons.rafterCwd
+			);
+		}
 	}
 }
