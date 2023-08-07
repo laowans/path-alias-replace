@@ -13,6 +13,38 @@ export interface WatchOpitons {
 	 * 忽略文件
 	 */
 	ignored?: WatchOptions['ignored'];
+	/**
+	 * 替换前执行命令
+	 */
+	rbefore?: string;
+	/**
+	 * 替换后执行命令
+	 */
+	rafter?: string;
+	/**
+	 * rbefore 环境变量
+	 */
+	rbeforeEnv?: ProcessEnvOptions['env'];
+	/**
+	 * rafter 环境变量
+	 */
+	rafterEnv?: ProcessEnvOptions['env'];
+	/**
+	 * rbefore cwd
+	 */
+	rbeforeCwd?: ProcessEnvOptions['cwd'];
+	/**
+	 * rafter cwd
+	 */
+	rafterCwd?: ProcessEnvOptions['cwd'];
+	/**
+	 * 是否在初始化时执行 rbefore
+	 */
+	rbeforeImmediate?: boolean;
+	/**
+	 * 是否在初始化时执行 rafter
+	 */
+	rafterImmediate?: boolean;
 }
 
 export declare interface Options {
@@ -66,38 +98,6 @@ export declare interface Options {
 		 * 监控目录，默认为 sweepPath
 		 */
 		watchPath?: string;
-		/**
-		 * 替换前执行命令
-		 */
-		rbefore?: string;
-		/**
-		 * 替换后执行命令
-		 */
-		rafter?: string;
-		/**
-		 * rbefore 环境变量
-		 */
-		rbeforeEnv?: ProcessEnvOptions['env'];
-		/**
-		 * rafter 环境变量
-		 */
-		rafterEnv?: ProcessEnvOptions['env'];
-		/**
-		 * 是否在初始化时执行 rbefore
-		 */
-		rbeforeImmediate?: boolean;
-		/**
-		 * 是否在初始化时执行 rafter
-		 */
-		rafterImmediate?: boolean;
-		/**
-		 * rbefore cwd
-		 */
-		rbeforeCwd?: ProcessEnvOptions['cwd'];
-		/**
-		 * rafter cwd
-		 */
-		rafterCwd?: ProcessEnvOptions['cwd'];
 	};
 }
 
