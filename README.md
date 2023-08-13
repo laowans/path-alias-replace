@@ -182,7 +182,7 @@ const { deleteFolderRecursive } = require('path-alias-replace');
 deleteFolderRecursive(path.join(__dirname, '../dist'));
 ```
 
-### 完整的配置文件
+### 完整的配置项
 
 ```js
 const options = {
@@ -228,7 +228,7 @@ const options = {
 
 	// 这个需要自动添加那些扩展名，当值为 undefined 时就不会自动添加
 	// 这个只会给 import 导入，自动添加那些扩展名，而 require 导入本就有这功能，所以无需自动添加
-	// 注意自动添加那些扩展名，是通过判断文件是否存在，来添加的
+	// 注意自动添加那些扩展名，是通过判断文件是否存在，来添加的，若有多个同名文件则根据扩展名的前后顺序，添加第一个匹配成功的
 	// 下面是默认值
 	importAutoAddExtension: ['js', 'mjs', 'json', 'node'],
 
@@ -297,10 +297,49 @@ const options = {
 		rafterImmediate: true,
 
 		// rbefore 的 cwd
-		rbeforeCwd
+		rbeforeCwd: '',
 
 		// rafter 的 cwd
-		rafterCwd
+		rafterCwd: '',
+	},
+};
+```
+
+### 没有注释的完整的配置项
+
+```js
+const options = {
+	// 必选的
+	sweepPath: path.join(__dirname, '../dist'),
+	alias: {
+		'@': path.join(__dirname, '../dist'),
+	},
+
+	// 可选的
+	ext: ['js'],
+	outputPath: path.join(__dirname, '../dist'),
+	createOutputPath: true,
+	require: true,
+	import: true,
+	importAutoAddExtension: ['js', 'mjs', 'json', 'node'],
+	outputReplacementInfo: true,
+	watch: false,
+	watchOpitons: {
+		watchPath: '',
+		ignored: '',
+		outputMsg: true,
+		rbefore: 'node dev.js',
+		rafter: 'node dev.js',
+		rbeforeEnv:{
+			NODE_ENV: 'development'
+		}
+		rafterEnv:{
+			NODE_ENV: 'development'
+		}
+		rbeforeImmediate: true,
+		rafterImmediate: true,
+		rbeforeCwd: '',
+		rafterCwd: '',
 	},
 };
 ```
