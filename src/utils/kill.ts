@@ -4,19 +4,17 @@ import treeKill from 'tree-kill';
 /**
  * 结束进程
  */
-export function kill(child: ChildProcess, callback?: (err?: Error) => void) {
-	if (!callback) {
-		callback = () => {};
-	}
-
-	if (child.pid) {
-		treeKill(child.pid, callback);
-	} else {
-		try {
-			child.kill('SIGKILL');
-			callback();
-		} catch (e) {
-			callback(e as Error);
+export function kill(child: ChildProcess): Promise<Error | undefined> {
+	return new Promise((resolve) => {
+		if (child.pid) {
+			treeKill(child.pid, resolve);
+		} else {
+			try {
+				child.kill('SIGKILL');
+				resolve(void 0);
+			} catch (e) {
+				resolve(e as Error);
+			}
 		}
-	}
+	});
 }
