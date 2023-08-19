@@ -4,10 +4,12 @@ import chalk from 'chalk';
 import { Options } from '@type';
 import { addExtension } from './utils/addExtension';
 
+// 替换信息类型
 interface ReplaceInfo {
 	[key: string]: string[][];
 }
 
+// 替换函数配置项
 export type ReplaceOptions = Required<
 	Pick<
 		Options,
@@ -32,10 +34,10 @@ function regexpEscape(s: string) {
 // 匹配 require 导入
 const requireRegExp = /(require\(['"])(.+)(['"]\))/g;
 // 匹配 import 导入
-const importRegExp1 = /(import .+ from ['"])(.+)(['"])/g; // import …… from ……
-const importRegExp2 = /(import ['"])(.+)(['"])/g; // import ……
-const importRegExp3 = /(import\(['"])(.+)(['"]\))/g; // import(……)
-const importRegExp4 = /(export .+ from ['"])(.+)(['"])/g; // export …… from ……
+const importRegExp1 = /(import .+ from ['"])(.+)(['"])/g; // import …… from {……}
+const importRegExp2 = /(import ['"])(.+)(['"])/g; // import {……}
+const importRegExp3 = /(import\(['"])(.+)(['"]\))/g; // import({……})
+const importRegExp4 = /(export .+ from ['"])(.+)(['"])/g; // export …… from {……}
 // 匹配文件扩展名
 const extRegExp = /.*\.([a-zA-Z0-9]+)$/;
 
@@ -64,6 +66,9 @@ function formatRelativePath(p: string, t?: string) {
 	return p;
 }
 
+/**
+ * 替换方法
+ */
 export function replace(options: ReplaceOptions) {
 	// 替换信息
 	const replaceInfo: ReplaceInfo = {};
@@ -109,6 +114,11 @@ export function replace(options: ReplaceOptions) {
 
 					// 拼接路径
 					to = path.join(options.alias[key], d);
+
+					break;
+				} else if (key === p2) {
+					// 防止导入路径只有别名时不会替换
+					to = options.alias[key];
 
 					break;
 				}
