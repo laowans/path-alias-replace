@@ -147,19 +147,15 @@ export class Watch {
 	/**
 	 * 防抖
 	 */
-	private async debounce(immediate = false) {
+	private debounce(immediate = false) {
 		clearTimeout(this.timeout);
 
-		try {
-			if (this.rbeforeBool && this.rbeforeProcess) {
-				await kill(this.rbeforeProcess);
-			}
+		if (this.rbeforeBool && this.rbeforeProcess) {
+			kill(this.rbeforeProcess);
+		}
 
-			if (this.rafterBool && this.rafterProcess) {
-				await kill(this.rafterProcess);
-			}
-		} catch (error) {
-			console.error(error);
+		if (this.rafterBool && this.rafterProcess) {
+			kill(this.rafterProcess);
 		}
 
 		this.timeout = setTimeout(() => {
