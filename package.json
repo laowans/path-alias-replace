@@ -1,12 +1,20 @@
 {
   "name": "path-alias-replace",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "路径别名替换",
   "keywords": [
     "alias",
     "replace"
   ],
   "author": "laowans",
+  "homepage": "https://github.com/laowans/path-alias-replace",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laowans/path-alias-replace"
+  },
+  "bugs": {
+    "url": "https://github.com/laowans/path-alias-replace/issues"
+  },
   "license": "ISC",
   "main": "./dist/index.js",
   "types": "./index.d.ts",
