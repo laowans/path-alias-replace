@@ -301,6 +301,9 @@ const options = {
 
 		// rafter 的 cwd
 		rafterCwd: '',
+
+		// 是否在终端监控 /r 的输入并重新执行替换和rbefore、rafter
+		'/r': true,
 	},
 };
 ```
@@ -340,6 +343,7 @@ const options = {
 		rafterImmediate: true,
 		rbeforeCwd: '',
 		rafterCwd: '',
+		'/r': true,
 	},
 };
 ```

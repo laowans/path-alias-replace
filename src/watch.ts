@@ -77,6 +77,25 @@ export class Watch {
 				this.debounce(true);
 
 				console.log(chalk.magenta(`start watch "${this.watchPath}"`));
+
+				if (this.opitons['/r']) {
+					// 监控终端 "/r" 的输入
+					process.stdin.setEncoding('utf8').on('data', (data) => {
+						let str: string;
+
+						if (Buffer.isBuffer(data)) {
+							str = data.toString();
+						} else {
+							str = data;
+						}
+						// 当监控到 "/r" 的输入重新执行 debounce 方法
+						if (str.trim() === '/r') {
+							console.log(chalk.magenta('restart'));
+
+							this.debounce();
+						}
+					});
+				}
 			});
 	}
 	/**
@@ -128,12 +147,20 @@ export class Watch {
 	/**
 	 * 防抖
 	 */
-	private debounce(immediate = false) {
+	private async debounce(immediate = false) {
 		clearTimeout(this.timeout);
 
-		if (this.rbeforeBool && this.rbeforeProcess) kill(this.rbeforeProcess);
+		try {
+			if (this.rbeforeBool && this.rbeforeProcess) {
+				await kill(this.rbeforeProcess);
+			}
 
-		if (this.rafterBool && this.rafterProcess) kill(this.rafterProcess);
+			if (this.rafterBool && this.rafterProcess) {
+				await kill(this.rafterProcess);
+			}
+		} catch (error) {
+			console.error(error);
+		}
 
 		this.timeout = setTimeout(() => {
 			this.create_rbefore(() => {

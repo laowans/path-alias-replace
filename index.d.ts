@@ -57,6 +57,12 @@ export interface WatchOpitons {
 	 * @default true
 	 */
 	rafterImmediate?: boolean;
+
+	/**
+	 * 是否在终端监控 /r 的输入并重新执行替换和rbefore、rafter
+	 * @default true
+	 */
+	'/r'?: boolean;
 }
 
 export declare interface Options {

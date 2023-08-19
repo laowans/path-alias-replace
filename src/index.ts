@@ -65,12 +65,14 @@ export function pathAliasReplace(opitons: Options) {
 				'rafterCwd',
 				'rbeforeEnv',
 				'rafterEnv',
+				'/r',
 			],
 			{
 				ignored: void 0,
 				outputMsg: true,
 				rbeforeImmediate: true,
 				rafterImmediate: true,
+				'/r': true,
 			}
 		);
 
