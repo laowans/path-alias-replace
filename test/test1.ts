@@ -9,6 +9,8 @@ const options: Options = {
 	sweepPath: path1,
 	alias: {
 		'@': path1,
+		$c: path.join(__dirname, './t/c.js'),
+		$dir: path.join(__dirname, './t/dir'),
 	},
 	outputPath: path2,
 };

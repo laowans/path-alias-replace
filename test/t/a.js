@@ -13,3 +13,7 @@ import './dir';
 import './dir/index.js';
 // 带别名
 import '@/dir/index.js';
+
+// 导入路径只有别名的情况
+import '$c';
+import '$dir';
